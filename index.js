@@ -36,7 +36,14 @@ function repeat(value, num) {
 // GLOBAL VARIABLES
 //
 
+
+// Event bus for unrelated components
 var bus = new Vue();
+
+
+//
+// COMPONENTS
+//
 
 Vue.component('card', {
     template: '#card-component',
@@ -220,7 +227,6 @@ Vue.component('deck', {
     }
 });
 
-
 Vue.component('players', {
     template: '#players-component',
     data: function () {
@@ -243,6 +249,11 @@ Vue.component('players', {
         for (var i = 0; i < DEFAULT_NB_PLAYER; i++) this.addPlayer();
     }
 });
+
+
+//
+// MAIN VIEW
+//
 
 
 var vm = new Vue({

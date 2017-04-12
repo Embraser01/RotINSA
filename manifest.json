@@ -4,50 +4,50 @@
       "name":"Rôti standard",
       "description": "Pour une rôtisserie classique en famille ou entre amis",
       "difficulty": 2,
-      "image": "./images/poulet.jpg",
-      "questions_url": "./decks/rotistandard.json"
+      "image": "images/poulet.jpg",
+      "questions_url": "decks/rotistandard.json"
     },
     {
       "name":"Je n'ai jamais",
       "description": "Découvrez des dossiers sur vos amis de manière très conviviale",
       "difficulty": 4,
-      "image": "./images/ribery.jpg",
-      "questions_url": "./decks/jenaijamais.json"
+      "image": "images/ribery.jpg",
+      "questions_url": "decks/jenaijamais.json"
     },
     {
       "name":"IF",
       "description": "Je suis ingénieur informaticieeeeeeeeeeeeeeeeen",
       "difficulty": 3,
-      "image": "./images/informaticien.jpg",
-      "questions_url": "./decks/if.json"
+      "image": "images/informaticien.jpg",
+      "questions_url": "decks/if.json"
     },
     {
       "name":"Citations",
       "description": "Complétez les citations données",
       "difficulty": 3,
-      "image": "./images/obama.jpg",
-      "questions_url": "./decks/repliques.json"
+      "image": "images/obama.jpg",
+      "questions_url": "decks/repliques.json"
     },
     {
       "name":"Ring of Fire",
       "description": "Baby you're so classic",
       "difficulty": 2,
-      "image": "./images/joker.jpg",
-      "questions_url": "./decks/ringoffire.json"
+      "image": "images/joker.jpg",
+      "questions_url": "decks/ringoffire.json"
     },
     {
       "name":"Hardcore",
       "description": "Pour les plus solides",
       "difficulty": 5,
-      "image": "./images/hardcore.jpg",
-      "questions_url": "./decks/hardcore.json"
+      "image": "images/hardcore.jpg",
+      "questions_url": "decks/hardcore.json"
     },
     {
       "name":"Fap Achievements",
       "description": "Différents fap achievements, distribue si tu l'as déjà fait ! (cartes en anglais)",
       "difficulty": 5,
-      "image": "./images/fap.jpg",
-      "questions_url": "./decks/fap.json"
+      "image": "images/fap.jpg",
+      "questions_url": "decks/fap.json"
     }
   ]
 }
