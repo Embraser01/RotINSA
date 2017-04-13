@@ -3,8 +3,11 @@
 //
 
 var DEFAULT_NB_PLAYER = 3;
+var BEER_ENTITY = '&#x1f37a;';
+var DEBUG_MODE = true;
+var ALERT_MSG = "Revenir à l'acceuil ?";
 
-
+// TODO Service Worker for offline access
 
 //
 // UTILS
@@ -33,6 +36,12 @@ function repeat(value, num) {
     return new Array(num + 1).join(value);
 }
 
+
+function log() {
+    if (!DEBUG_MODE) return;
+
+    return console.log(arguments);
+}
 //
 // GLOBAL VARIABLES AND INIT
 //
@@ -41,6 +50,7 @@ Vue.config.devtools = true;
 
 // Include Vue material
 Vue.use(VueMaterial);
+
 
 // Event bus for unrelated components
 var bus = new Vue();
@@ -61,7 +71,7 @@ Vue.component('card', {
     },
     methods: {
         loadDeck: function () {
-            console.log('Loading deck ', this.deck);
+            log('Loading deck ', this.deck);
 
             var xhr = new XMLHttpRequest();
             var self = this;
@@ -84,11 +94,11 @@ Vue.component('deck', {
     data: function () {
         return {
             status: 0, // 0 Not started | 1 Players loading | 2 Rules | 3 Playing
-            currentCard: {},
-            currentPlayer: {},
+            currentCard: null,
+            currentPlayer: null,
             info: {},
             cards: [],
-            usedCards: [],
+            notUsedCards: [],
             players: []
         }
     },
@@ -99,10 +109,10 @@ Vue.component('deck', {
             var content = this.currentCard.content;
             var list;
 
-            console.log('humanize', this.currentCard);
+            log('humanize', this.currentCard);
 
             // DEPRECATED {b}
-            content = content.replace(/{b}/g, String.fromCharCode(0xf0fc));
+            content = content.replace(/{b}/g, BEER_ENTITY);
 
             // {b1-3}
             list = content.match(/{b\d+-\d+}/g);
@@ -114,7 +124,7 @@ Vue.component('deck', {
                         // Each string is different
                         var data = /{b(\d+)-(\d+)}/g.exec(value);
 
-                        return repeat(String.fromCharCode(0xf0fc), Number(data[2]) - Number(data[1]));
+                        return repeat(BEER_ENTITY, Number(data[2]) - Number(data[1]));
                     }
                 );
             }
@@ -145,11 +155,11 @@ Vue.component('deck', {
             // {one|two|three}
 
             // {b1-3}
-            list = content.match(/{((\w|\s)+)(\|(\w|\s)+)+}/g);
+            list = content.match(/{.+(\|.+)+}/g);
 
             if (list) {
                 content = content.replace(
-                    /{((\w|\s)+)(\|(\w|\s)+)+}/g,
+                    /{.+(\|.+)+}/g,
                     function (value) {
                         // Each string is different
                         var data = value.slice(1, -1).split('|');
@@ -168,11 +178,11 @@ Vue.component('deck', {
             this.cards = cards;
             this.status = 1; // Ready to load players
 
-            console.log('Init w/', this);
+            log('Init w/', this);
         },
         validatePlayers: function (players) {
             this.players = players;
-            console.log('Players for this party are : ', players);
+            log('Players for this party are : ', players);
 
             this.ready();
         },
@@ -180,19 +190,21 @@ Vue.component('deck', {
             // Showing rules
             this.status = 2;
 
-            this.cards = shuffle(this.cards);
-            this.usedCards = [];
-            this.currentCard = {};
-            this.currentPlayer = {};
+            this.notUsedCards = shuffle(this.cards);
+            this.currentCard = null;
+            this.currentPlayer = null;
         },
         closeRules: function () {
             // We start or restart playing
             this.status = 3;
+            this.next();
         },
         next: function () {
-            console.log('Players : ', this.players);
-            if (this.cards.length !== this.usedCards.length) {
+            if (this.notUsedCards.length > 0) {
                 // Loading next card and next player
+
+                // For the first card we need to have an object
+                if (this.currentCard === null) this.currentCard = {};
 
                 this.currentCard.skipTurn = this.currentCard.skipTurn || 1;
 
@@ -203,18 +215,15 @@ Vue.component('deck', {
                         break;
                     case 2:
                         // Skip one player
-                        this.currentPlayer = this.players[(this.players.indexOf(this.players) + 2) % this.players.length];
+                        this.currentPlayer = this.players[(this.players.indexOf(this.currentPlayer) + 2) % this.players.length];
                         break;
                     case 1:
                     default:
-                        this.currentPlayer = this.players[(this.players.indexOf(this.players) + 1) % this.players.length];
+                        this.currentPlayer = this.players[(this.players.indexOf(this.currentPlayer) + 1) % this.players.length];
                         break;
                 }
 
-                do {
-                    this.currentCard = this.cards[Math.floor(Math.random() * this.cards.length)];
-                    // While it's an used card
-                } while (this.usedCards.indexOf(this.currentCard) !== -1);
+                this.currentCard = this.notUsedCards[Math.floor(Math.random() * this.notUsedCards.length)];
 
                 // COUNT
                 this.currentCard.currentCount = this.currentCard.currentCount || this.currentCard.count || 0;
@@ -223,10 +232,9 @@ Vue.component('deck', {
                     // If the card can be selected more than one time
                     this.currentCard.currentCount--;
                 } else {
-                    // Otherwise we add this card in usedCards
-                    this.usedCards.push(this.currentCard)
+                    // Otherwise we remove this card from notUsedCard
+                    this.notUsedCards.splice(this.notUsedCards.indexOf(this.currentCard), 1);
                 }
-
             } else {
                 // END Of the game
                 this.status = 4;
@@ -235,13 +243,14 @@ Vue.component('deck', {
         end: function (restart) {
             if (restart) {
                 this.ready();
-            } else {
+            } else if (confirm(ALERT_MSG)){
+                this.status = 0;
                 bus.$emit('deck-finished');
             }
         }
     },
     created: function () {
-        console.log('Deck created');
+        log('Deck created');
         bus.$on('deck-loaded', this.init);
     }
 });
@@ -312,7 +321,7 @@ var vm = new Vue({
                 // We add some random here because why not
                 self.app.decks = shuffle(self.app.decks);
                 self.decks = self.app.decks;
-                console.log(self.decks);
+                log(self.decks);
             };
             xhr.send()
         }

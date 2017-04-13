@@ -31,29 +31,27 @@
 </head>
 <body>
 <div id="app">
-    <div class="app">
-        <deck></deck>
-        <md-layout md-column md-gutter>
-            <div v-if="!hide">
-                <h2 class="title">Rôt'INSA</h2>
-                <h2 class="subtitle">La rôtiserie en ligne</h2>
+    <deck></deck>
+    <md-layout md-column md-gutter>
+        <div v-if="!hide">
+            <h2 class="title">Rôt'INSA</h2>
+            <h2 class="subtitle">La rôtiserie en ligne</h2>
 
-                <md-layout md-align="center" md-row md-gutter>
-                    <card md-flex v-for="deck in decks" :deck="deck"></card>
-                </md-layout>
-            </div>
-            <md-bottom-bar v-if="!hide" class="bottom-bar">
-                <h1 class="md-body-1">Idée originale par
-                    <a href="https://fr.linkedin.com/in/clément-espeute-231618111">Clément ESPEUTE</a>,&nbsp;
-                    <a href="https://fr.linkedin.com/in/sophie-legras-614785b2">Sophie LEGRAS</a> et
-                    <a href="https://fr.linkedin.com/in/mathis-hammel-467baaa6">Mathis HAMMEL</a>.
-                    Reprise par <a href="https://github.com/Embraser01">Marc-Antoine FERNANDES</a>.</h1>
-                <span style="flex: 1;"></span>
-                <h1 class="md-body-1"><a href="https://github.com/Embraser01/RotINSA">Contribuer sur Github</a></h1>
-            </md-bottom-bar>
-        </md-layout>
-    </div>
-
+            <md-layout md-align="center" md-row md-gutter>
+                <card md-flex v-for="deck in decks" :deck="deck"></card>
+            </md-layout>
+        </div>
+        <md-bottom-bar v-if="!hide" class="bottom-bar">
+            <h1 class="md-body-1">Idée originale
+                <a href="https://github.com/kara71/RotINSA">ici</a>,
+                reprise par <a href="https://github.com/Embraser01">Marc-Antoine FERNANDES</a></h1>
+            <span style="flex: 1;"></span>
+            <a href="https://github.com/Embraser01/RotINSA">
+                <md-icon>public</md-icon>
+                <md-tooltip md-direction="top">Voir sur Github</md-tooltip>
+            </a>
+        </md-bottom-bar>
+    </md-layout>
 </div>
 
 
@@ -91,39 +89,37 @@
 <!--------------------->
 
 <script type="text/x-template" id="deck-component">
-    <div>
-
+    <div class="deck">
         <!-- READING -->
         <players v-if="status === 1" v-on:validate="validatePlayers"></players>
 
         <!-- RULES -->
         <md-card v-else-if="status === 2" class="rules">
             <md-card-header>
-                <div class="md-title">Liste des joueurs</div>
+                <div class="md-title">Règles</div>
             </md-card-header>
 
             <md-card-content>
-                <div v-for="player in players">
-                    <md-input-container>
-                        <label>Nom du joueur</label>
-                        <md-input required v-model="player.name"></md-input>
-                        <span class="md-error">Vous devez rentrer un nom (déjà rôti ?)</span>
-                    </md-input-container>
-                </div>
+                Chaque rôti tire une carte à tour de role dans le sens des aiguilles d'une montre.
+                <br>
+                Un &#x1f37a; indique un shot de boisson. Chacun est libre de boire ce qu'il veut, du moment que ça rend
+                rôti. <br>
+                <b> Bon Rôtissage !</b>
             </md-card-content>
 
             <md-card-actions>
-                <md-button @click.native="addPlayer()">Ajouter un joueur</md-button>
-                <md-button type="submit">Valider</md-button>
+                <md-button @click.native="closeRules()">LAISSE MOI JOUER</md-button>
             </md-card-actions>
         </md-card>
 
         <!-- GAME -->
         <div v-else-if="status === 3">
-            <span>Question : {{ cardReader }}</span>
-            <button @click="next()">Next</button>
-            <button @click="close()">Close</button>
+            <md-whiteframe class="question" md-elevation="2" @click.native="next()">
+                <span v-html="cardReader" class="md-subheading"></span>
+            </md-whiteframe>
+            <p v-if="currentPlayer" class="md-title player-name">C'est au tour de {{ currentPlayer.name }}</p>
         </div>
+        <md-button v-if="status !== 0" class="md-raised go-back" @click.native="end()">Retourner à l'accueil</md-button>
     </div>
 
 </script>
