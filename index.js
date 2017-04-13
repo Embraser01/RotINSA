@@ -190,7 +190,7 @@ Vue.component('deck', {
             // Showing rules
             this.status = 2;
 
-            this.notUsedCards = shuffle(this.cards);
+            this.notUsedCards = shuffle(this.cards.slice(0));
             this.currentCard = null;
             this.currentPlayer = null;
         },

@@ -115,10 +115,27 @@
         <!-- GAME -->
         <div v-else-if="status === 3">
             <md-whiteframe class="question" md-elevation="2" @click.native="next()">
-                <span v-html="cardReader" class="md-subheading"></span>
+                <span v-html="cardReader" class="md-subheading noselect"></span>
             </md-whiteframe>
-            <p v-if="currentPlayer" class="md-title player-name">C'est au tour de {{ currentPlayer.name }}</p>
+            <p v-if="currentPlayer" class="md-title player-name noselect">C'est au tour de {{ currentPlayer.name }}</p>
         </div>
+
+        <!-- GAME'S END -->
+        <md-card v-else-if="status === 4" class="rules">
+            <md-card-header>
+                <div class="md-title">Fin</div>
+            </md-card-header>
+
+            <md-card-content>
+               C'est la fin ! Vous pouvez recommencer ou bien revenir à l'accueil
+            </md-card-content>
+
+            <md-card-actions>
+                <md-button @click.native="end(true)">ENCORE</md-button>
+            </md-card-actions>
+        </md-card>
+
+        <!-- GO BACK BUTTON -->
         <md-button v-if="status !== 0" class="md-raised go-back" @click.native="end()">Retourner à l'accueil</md-button>
     </div>
 
