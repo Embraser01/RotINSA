@@ -33,9 +33,11 @@ function repeat(value, num) {
 }
 
 //
-// GLOBAL VARIABLES
+// GLOBAL VARIABLES AND INIT
 //
 
+// Include Vue material
+Vue.use(VueMaterial);
 
 // Event bus for unrelated components
 var bus = new Vue();
