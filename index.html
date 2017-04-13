@@ -154,10 +154,10 @@
             </md-card-header>
 
             <md-card-content>
-                <div v-for="player in players">
+                <div v-for="(player, index) in players">
                     <md-input-container>
                         <label>Nom du joueur</label>
-                        <md-input required v-model="player.name"></md-input>
+                        <md-input required v-model="player.name" :tabindex="index + 1"></md-input>
                         <span class="md-error">Vous devez rentrer un nom (déjà rôti ?)</span>
                     </md-input-container>
                 </div>
