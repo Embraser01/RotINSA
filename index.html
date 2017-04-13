@@ -20,7 +20,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
     <!-- FONTS AND CSS -->
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto+Slab:300|Roboto:300,400,400i,500,700">
     <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="//unpkg.com/vue-material/dist/vue-material.css">
     <link rel="stylesheet" href="index.css">
@@ -31,35 +31,40 @@
 </head>
 <body>
 <div id="app">
-    <md-layout md-column md-gutter>
-        <md-toolbar class="md-large">
-            <div class="md-toolbar-container">
-                <h2 class="md-headline">Rôt'INSA</h2>
-                <span style="flex: 1;"></span>
-            </div>
-
-            <div class="md-toolbar-container">
-                <h2 class="md-title">La rôtiserie en ligne</h2>
-            </div>
-        </md-toolbar>
-        <md-layout md-row md-gutter>
-            <card md-flex v-for="deck in decks" :deck="deck"></card>
-        </md-layout>
-
-
+    <div class="app">
         <deck></deck>
+        <md-layout md-column md-gutter>
+            <div v-if="!hide">
+                <h2 class="title">Rôt'INSA</h2>
+                <h2 class="subtitle">La rôtiserie en ligne</h2>
 
-        <md-bottom-bar>
-            Created by Me.... Thx.... 42... INSA
-        </md-bottom-bar>
-    </md-layout>
+                <md-layout md-align="center" md-row md-gutter>
+                    <card md-flex v-for="deck in decks" :deck="deck"></card>
+                </md-layout>
+            </div>
+            <md-bottom-bar v-if="!hide" class="bottom-bar">
+                <h1 class="md-body-1">Idée originale par
+                    <a href="https://fr.linkedin.com/in/clément-espeute-231618111">Clément ESPEUTE</a>,&nbsp;
+                    <a href="https://fr.linkedin.com/in/sophie-legras-614785b2">Sophie LEGRAS</a> et
+                    <a href="https://fr.linkedin.com/in/mathis-hammel-467baaa6">Mathis HAMMEL</a>.
+                    Reprise par <a href="https://github.com/Embraser01">Marc-Antoine FERNANDES</a>.</h1>
+                <span style="flex: 1;"></span>
+                <h1 class="md-body-1"><a href="https://github.com/Embraser01/RotINSA">Contribuer sur Github</a></h1>
+            </md-bottom-bar>
+        </md-layout>
+    </div>
+
 </div>
 
 
 <!------- COMPONENTS -------->
 
+<!--------------------->
+<!------- CARD -------->
+<!--------------------->
+
 <script type="text/x-template" id="card-component">
-    <md-card md-with-hover>
+    <md-card md-with-hover class="card">
         <md-card-media-cover md-solid>
             <md-card-media>
                 <img :src="deck.cover" :alt="deck.name"/>
@@ -71,6 +76,8 @@
                 </md-card-header>
 
                 <md-card-actions>
+                    <span class="md-body-2">Niveau <md-icon v-for="level in deck.difficulty">star</md-icon></span>
+                    <span style="flex: 1;"></span>
                     <md-button @click.native="loadDeck()">C'EST PARTI</md-button>
                 </md-card-actions>
             </md-card-area>
@@ -78,29 +85,78 @@
     </md-card>
 </script>
 
+
+<!--------------------->
+<!------- DECK -------->
+<!--------------------->
+
 <script type="text/x-template" id="deck-component">
-    <div v-if="launched" class="deck">
-        <div v-if="!playersInit">
+    <div>
+
+        <!-- READING -->
+        <players v-if="status === 1" v-on:validate="validatePlayers"></players>
+
+        <!-- RULES -->
+        <md-card v-else-if="status === 2" class="rules">
+            <md-card-header>
+                <div class="md-title">Liste des joueurs</div>
+            </md-card-header>
+
+            <md-card-content>
+                <div v-for="player in players">
+                    <md-input-container>
+                        <label>Nom du joueur</label>
+                        <md-input required v-model="player.name"></md-input>
+                        <span class="md-error">Vous devez rentrer un nom (déjà rôti ?)</span>
+                    </md-input-container>
+                </div>
+            </md-card-content>
+
+            <md-card-actions>
+                <md-button @click.native="addPlayer()">Ajouter un joueur</md-button>
+                <md-button type="submit">Valider</md-button>
+            </md-card-actions>
+        </md-card>
+
+        <!-- GAME -->
+        <div v-else-if="status === 3">
             <span>Question : {{ cardReader }}</span>
             <button @click="next()">Next</button>
             <button @click="close()">Close</button>
         </div>
-
-        <players v-if="playersInit" v-on:validate="validatePlayers"></players>
     </div>
+
 </script>
+
+
+<!------------------------------>
+<!------- PLAYERS INPUT -------->
+<!------------------------------>
 
 <script type="text/x-template" id="players-component">
-    <div class="deck">
-        <div v-for="player in players">
-            <label>
-                Nom du joueur : <input v-model="player.name" placeholder="Pseudo">
-            </label>
-        </div>
-        <button @click="addPlayer()">Ajouter un joueur</button>
-        <button @click="validate()">Valider</button>
-    </div>
-</script>
-</body>
+    <form @submit.stop.prevent="validate">
+        <md-card class="players">
+            <md-card-header>
+                <div class="md-title">Liste des joueurs</div>
+            </md-card-header>
 
+            <md-card-content>
+                <div v-for="player in players">
+                    <md-input-container>
+                        <label>Nom du joueur</label>
+                        <md-input required v-model="player.name"></md-input>
+                        <span class="md-error">Vous devez rentrer un nom (déjà rôti ?)</span>
+                    </md-input-container>
+                </div>
+            </md-card-content>
+
+            <md-card-actions>
+                <md-button @click.native="addPlayer()">Ajouter un joueur</md-button>
+                <md-button type="submit">Valider</md-button>
+            </md-card-actions>
+        </md-card>
+    </form>
+</script>
+
+</body>
 </html>

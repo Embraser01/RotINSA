@@ -1,7 +1,53 @@
 html, body {
-    height: 100%
+    height: 100%;
+    margin: 0;
 }
 
 #app {
     height: 100%;
+}
+
+.app {
+    background-color: #2c3e50;
+    min-height: 100%;
+    margin: 0;
+}
+
+.title {
+    font-family: 'Roboto Slab', sans-serif;
+    font-weight: 300;
+    text-align: center;
+    color: #ecf0f1;
+    font-size: 100px;
+}
+
+.subtitle {
+    font-family: 'Roboto Slab', sans-serif;
+    color: #FFFFFF;
+    font-weight: 300;
+    text-align: center;
+    font-size: 2.92rem;
+}
+
+.card {
+    width: 525px;
+    height: 260px;
+    margin: 12px;
+    overflow-y: hidden;
+}
+
+.card > .md-card-media-cover {
+    height: 100%;
+}
+
+.bottom-bar {
+    margin-top: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.players {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }

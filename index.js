@@ -5,6 +5,7 @@
 var DEFAULT_NB_PLAYER = 3;
 
 
+
 //
 // UTILS
 //
@@ -35,6 +36,8 @@ function repeat(value, num) {
 //
 // GLOBAL VARIABLES AND INIT
 //
+
+Vue.config.devtools = true;
 
 // Include Vue material
 Vue.use(VueMaterial);
@@ -80,8 +83,7 @@ Vue.component('deck', {
     template: '#deck-component',
     data: function () {
         return {
-            launched: false,
-            playersInit: true,
+            status: 0, // 0 Not started | 1 Players loading | 2 Rules | 3 Playing
             currentCard: {},
             currentPlayer: {},
             info: {},
@@ -163,19 +165,29 @@ Vue.component('deck', {
     methods: {
         init: function (info, cards) {
             this.info = info;
-            this.cards = shuffle(cards);
-            this.launched = true;
-            console.log('Init w/', info);
+            this.cards = cards;
+            this.status = 1; // Ready to load players
+
+            console.log('Init w/', this);
         },
         validatePlayers: function (players) {
             this.players = players;
-            this.playersInit = false;
             console.log('Players for this party are : ', players);
-            this.rules();
+
+            this.ready();
         },
-        rules: function () {
-            // TODO Afficher les règles
-            this.next();
+        ready: function () {
+            // Showing rules
+            this.status = 2;
+
+            this.cards = shuffle(this.cards);
+            this.usedCards = [];
+            this.currentCard = {};
+            this.currentPlayer = {};
+        },
+        closeRules: function () {
+            // We start or restart playing
+            this.status = 3;
         },
         next: function () {
             console.log('Players : ', this.players);
@@ -217,14 +229,19 @@ Vue.component('deck', {
 
             } else {
                 // END Of the game
-                // Retry or go to DECK selection
+                this.status = 4;
             }
         },
-        close: function () {
-            this.launched = false;
+        end: function (restart) {
+            if (restart) {
+                this.ready();
+            } else {
+                bus.$emit('deck-finished');
+            }
         }
     },
     created: function () {
+        console.log('Deck created');
         bus.$on('deck-loaded', this.init);
     }
 });
@@ -243,7 +260,6 @@ Vue.component('players', {
             });
         },
         validate: function () {
-            // TODO Check each name
             this.$emit('validate', this.players);
         }
     },
@@ -264,12 +280,24 @@ var vm = new Vue({
 
     data: {
         app: null,
+        hide: false,
         decks: null
     },
 
     created: function () {
+        // We subscribe for when the deck is closed or loaded
+        var self = this;
+        bus.$on('deck-finished', function () {
+            self.hide = false;
+        });
+        bus.$on('deck-loaded', function () {
+            self.hide = true;
+        });
+
         // Chargement de la liste des decks
         this.fetchData();
+
+
     },
 
     methods: {
@@ -281,6 +309,8 @@ var vm = new Vue({
             xhr.onload = function () {
                 self.app = JSON.parse(xhr.responseText);
 
+                // We add some random here because why not
+                self.app.decks = shuffle(self.app.decks);
                 self.decks = self.app.decks;
                 console.log(self.decks);
             };
