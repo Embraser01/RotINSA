@@ -2,10 +2,10 @@
 //  CONSTANTES
 //
 
-var DEFAULT_NB_PLAYER = 3;
-var BEER_ENTITY = '&#x1f37a;';
-var DEBUG_MODE = true;
-var ALERT_MSG = "Revenir à l'acceuil ?";
+const DEFAULT_NB_PLAYER = 3;
+const BEER_ENTITY = '&#x1f37a;';
+const DEBUG_MODE = true;
+const ALERT_MSG = "Revenir à l'acceuil ?";
 
 // TODO Service Worker for offline access
 
@@ -14,7 +14,7 @@ var ALERT_MSG = "Revenir à l'acceuil ?";
 //
 
 function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+    let currentIndex = array.length, temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {
@@ -43,7 +43,7 @@ function log() {
     return console.log(arguments);
 }
 //
-// GLOBAL VARIABLES AND INIT
+// GLOBAL letIABLES AND INIT
 //
 
 Vue.config.devtools = true;
@@ -53,7 +53,7 @@ Vue.use(VueMaterial);
 
 
 // Event bus for unrelated components
-var bus = new Vue();
+let bus = new Vue();
 
 
 //
@@ -73,12 +73,12 @@ Vue.component('card', {
         loadDeck: function () {
             log('Loading deck ', this.deck);
 
-            var xhr = new XMLHttpRequest();
-            var self = this;
+            let xhr = new XMLHttpRequest();
+            let self = this;
 
             xhr.open('GET', this.deck.questions_url);
             xhr.onload = function () {
-                var data = JSON.parse(xhr.responseText);
+                let data = JSON.parse(xhr.responseText);
 
                 // TODO Mettre en cache les questions
 
@@ -106,8 +106,8 @@ Vue.component('deck', {
         cardReader: function () {
             if (!this.currentCard) return;
 
-            var content = this.currentCard.content;
-            var list;
+            let content = this.currentCard.content;
+            let list;
 
             log('humanize', this.currentCard);
 
@@ -122,7 +122,7 @@ Vue.component('deck', {
                     /{b\d+-\d+}/g,
                     function (value) {
                         // Each string is different
-                        var data = /{b(\d+)-(\d+)}/g.exec(value);
+                        let data = /{b(\d+)-(\d+)}/g.exec(value);
 
                         return repeat(BEER_ENTITY, Number(data[2]) - Number(data[1]));
                     }
@@ -133,8 +133,8 @@ Vue.component('deck', {
             if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer.name);
 
             // {j2} & {j3}
-            var j2 = this.players[Math.floor(Math.random() * this.players.length)];
-            var j3 = this.players[Math.floor(Math.random() * this.players.length)];
+            let j2 = this.players[Math.floor(Math.random() * this.players.length)];
+            let j3 = this.players[Math.floor(Math.random() * this.players.length)];
 
 
             if (j2 === this.currentPlayer) {
@@ -162,7 +162,7 @@ Vue.component('deck', {
                     /{.+(\|.+)+}/g,
                     function (value) {
                         // Each string is different
-                        var data = value.slice(1, -1).split('|');
+                        let data = value.slice(1, -1).split('|');
                         return data[Math.floor(Math.random() * data.length)];
                     }
                 );
@@ -273,7 +273,7 @@ Vue.component('players', {
         }
     },
     created: function () {
-        for (var i = 0; i < DEFAULT_NB_PLAYER; i++) this.addPlayer();
+        for (let i = 0; i < DEFAULT_NB_PLAYER; i++) this.addPlayer();
     }
 });
 
@@ -283,7 +283,7 @@ Vue.component('players', {
 //
 
 
-var vm = new Vue({
+let vm = new Vue({
 
     el: '#app',
 
@@ -295,7 +295,7 @@ var vm = new Vue({
 
     created: function () {
         // We subscribe for when the deck is closed or loaded
-        var self = this;
+        let self = this;
         bus.$on('deck-finished', function () {
             self.hide = false;
         });
@@ -311,8 +311,8 @@ var vm = new Vue({
 
     methods: {
         fetchData: function () {
-            var xhr = new XMLHttpRequest();
-            var self = this;
+            let xhr = new XMLHttpRequest();
+            let self = this;
 
             xhr.open('GET', './manifest.json');
             xhr.onload = function () {
