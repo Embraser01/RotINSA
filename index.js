@@ -7,8 +7,6 @@ const BEER_ENTITY = '&#x1f37a;';
 const DEBUG_MODE = true;
 const ALERT_MSG = "Revenir à l'acceuil ?";
 
-// TODO Service Worker for offline access
-
 //
 // UTILS
 //
@@ -36,14 +34,25 @@ function repeat(value, num) {
     return new Array(num + 1).join(value);
 }
 
+function generateUUID() { // Public Domain/MIT
+    let d = new Date().getTime();
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+        d += performance.now(); //use high-precision timer if available
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
 
 function log() {
     if (!DEBUG_MODE) return;
-
     return console.log(arguments);
 }
+
 //
-// GLOBAL letIABLES AND INIT
+// GLOBAL VARIABLES AND INIT
 //
 
 Vue.config.devtools = true;
@@ -67,21 +76,16 @@ Vue.component('card', {
         return {
             info: {},
             cards: null
-        }
+        };
     },
     methods: {
         loadDeck: function () {
             log('Loading deck ', this.deck);
 
             let xhr = new XMLHttpRequest();
-            let self = this;
-
             xhr.open('GET', this.deck.questions_url);
-            xhr.onload = function () {
+            xhr.onload = () => {
                 let data = JSON.parse(xhr.responseText);
-
-                // TODO Mettre en cache les questions
-
                 bus.$emit('deck-loaded', data.info, data.cards);
             };
             xhr.send()
@@ -100,7 +104,7 @@ Vue.component('deck', {
             cards: [],
             notUsedCards: [],
             players: []
-        }
+        };
     },
     computed: {
         cardReader: function () {
@@ -243,7 +247,7 @@ Vue.component('deck', {
         end: function (restart) {
             if (restart) {
                 this.ready();
-            } else if (confirm(ALERT_MSG)){
+            } else if (confirm(ALERT_MSG)) {
                 this.status = 0;
                 bus.$emit('deck-finished');
             }
@@ -295,12 +299,11 @@ let vm = new Vue({
 
     created: function () {
         // We subscribe for when the deck is closed or loaded
-        let self = this;
-        bus.$on('deck-finished', function () {
-            self.hide = false;
+        bus.$on('deck-finished', () => {
+            this.hide = false;
         });
-        bus.$on('deck-loaded', function () {
-            self.hide = true;
+        bus.$on('deck-loaded', () => {
+            this.hide = true;
         });
 
         // Chargement de la liste des decks
@@ -312,18 +315,74 @@ let vm = new Vue({
     methods: {
         fetchData: function () {
             let xhr = new XMLHttpRequest();
-            let self = this;
 
             xhr.open('GET', './manifest.json');
-            xhr.onload = function () {
-                self.app = JSON.parse(xhr.responseText);
+            xhr.onload = () => {
+                this.app = JSON.parse(xhr.responseText);
 
                 // We add some random here because why not
-                self.app.decks = shuffle(self.app.decks);
-                self.decks = self.app.decks;
-                log(self.decks);
+                this.app.decks = shuffle(this.app.decks);
+                this.decks = this.app.decks;
+                log(this.decks);
             };
             xhr.send()
         }
     }
 });
+
+
+//
+// SERVICES
+//
+
+class Player {
+    constructor(name) {
+        this._name = name;
+        this.id = generateUUID();
+    }
+
+    set name(name) {
+        this._name = name;
+    }
+
+    get name() {
+        return this._name;
+    }
+}
+
+class PlayersService {
+
+    constructor() {
+        this._players = JSON.parse(localStorage.getItem('players')) || [];
+    }
+
+    get players() {
+        return this._players.slice(0);
+    }
+
+    addPlayer(player) {
+        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
+        this._players.push(player);
+        this._save();
+    }
+
+    deletePlayer(player) {
+        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
+        this._players = this._players.filter(p => p.id !== player.id);
+        this._save();
+    }
+
+    updatePlayer(player) {
+        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
+        let toUpdate = this._players.find(p => p.id !== player.id);
+
+        if (toUpdate && toUpdate !== player) toUpdate.name = player.name;
+        this._save();
+    }
+
+    _save() {
+        localStorage.setItem('players', JSON.stringify(this._players));
+    }
+}
+
+let playersService = new PlayersService();

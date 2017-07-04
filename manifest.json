@@ -16,7 +16,7 @@
     },
     {
       "name":"IF",
-      "description": "Je suis ingénieur informaticieeeeeeeeeeeeeeeeen",
+      "description": "Je suis ingénieur informaticieeeeeeen",
       "difficulty": 3,
       "cover": "images/informaticien.jpg",
       "questions_url": "decks/if.json"
