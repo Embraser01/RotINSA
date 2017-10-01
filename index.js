@@ -39,7 +39,7 @@ function generateUUID() { // Public Domain/MIT
     if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
         d += performance.now(); //use high-precision timer if available
     }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = (d + Math.random() * 16) % 16 | 0;
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
@@ -55,14 +55,14 @@ function log() {
 // GLOBAL VARIABLES AND INIT
 //
 
-Vue.config.devtools = true;
+Vue.config.devtools = DEBUG_MODE;
 
 // Include Vue material
 Vue.use(VueMaterial);
 
 
 // Event bus for unrelated components
-let bus = new Vue();
+const bus = new Vue();
 
 
 //
@@ -111,7 +111,6 @@ Vue.component('deck', {
             if (!this.currentCard) return;
 
             let content = this.currentCard.content;
-            let list;
 
             log('humanize', this.currentCard);
 
@@ -119,19 +118,11 @@ Vue.component('deck', {
             content = content.replace(/{b}/g, BEER_ENTITY);
 
             // {b1-3}
-            list = content.match(/{b\d+-\d+}/g);
-
-            if (list) {
-                content = content.replace(
-                    /{b\d+-\d+}/g,
-                    function (value) {
-                        // Each string is different
-                        let data = /{b(\d+)-(\d+)}/g.exec(value);
-
-                        return repeat(BEER_ENTITY, Number(data[2]) - Number(data[1]));
-                    }
-                );
-            }
+            content = content.replace(/{b\d+-\d+}/g, value => {
+                // Each string is different
+                const data = /{b(\d+)-(\d+)}/g.exec(value);
+                return repeat(BEER_ENTITY, Number(data[2]) - Number(data[1]));
+            });
 
             // {j1}
             if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer.name);
@@ -157,21 +148,11 @@ Vue.component('deck', {
             content = content.replace(/{j3}/g, j3.name);
 
             // {one|two|three}
-
-            // {b1-3}
-            list = content.match(/{.+(\|.+)+}/g);
-
-            if (list) {
-                content = content.replace(
-                    /{.+(\|.+)+}/g,
-                    function (value) {
-                        // Each string is different
-                        let data = value.slice(1, -1).split('|');
-                        return data[Math.floor(Math.random() * data.length)];
-                    }
-                );
-            }
-
+            content = content.replace(/{.+(\|.+)+}/g, value => {
+                // Each string is different
+                const data = value.slice(1, -1).split('|');
+                return data[Math.floor(Math.random() * data.length)];
+            });
 
             return content;
         }
@@ -287,7 +268,7 @@ Vue.component('players', {
 //
 
 
-let vm = new Vue({
+const vm = new Vue({
 
     el: '#app',
 
@@ -314,7 +295,7 @@ let vm = new Vue({
 
     methods: {
         fetchData: function () {
-            let xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
 
             xhr.open('GET', './manifest.json');
             xhr.onload = () => {
@@ -357,7 +338,7 @@ class PlayersService {
     }
 
     get players() {
-        return this._players.slice(0);
+        return this._players.slice(0); // Clone array
     }
 
     addPlayer(player) {
@@ -374,7 +355,7 @@ class PlayersService {
 
     updatePlayer(player) {
         if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        let toUpdate = this._players.find(p => p.id !== player.id);
+        const toUpdate = this._players.find(p => p.id !== player.id);
 
         if (toUpdate && toUpdate !== player) toUpdate.name = player.name;
         this._save();

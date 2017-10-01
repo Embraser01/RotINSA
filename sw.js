@@ -1,4 +1,5 @@
-const CACHE_NAME = 'rot-insa-v1-';
+const CACHE_VERSION = 1;
+const CACHE_NAME = `rot-insa-v${CACHE_VERSION}-`;
 
 const URLS_TO_CACHE = {
     static: [
@@ -33,7 +34,7 @@ const URLS_TO_CACHE = {
         'images/ribery.jpg',
     ],
     decks: [
-        'manifest.json',
+        'decks/manifest.json',
         'decks/fap.json',
         'decks/hardcore.json',
         'decks/if.json',
@@ -46,7 +47,7 @@ const URLS_TO_CACHE = {
 
 
 self.addEventListener('install', event => {
-    let promises = [];
+    const promises = [];
 
     promises.push(caches.open(CACHE_NAME + 'decks').then(cache => cache.addAll(URLS_TO_CACHE.decks)));
     promises.push(caches.open(CACHE_NAME + 'static').then(cache => cache.addAll(URLS_TO_CACHE.static)));
@@ -56,7 +57,7 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
 
-    let requestURL = new URL(event.request.url);
+    const requestURL = new URL(event.request.url);
 
     // Routing for local URLs
     if (requestURL.origin === location.origin) {
@@ -79,5 +80,6 @@ self.addEventListener('fetch', event => {
 
 
 function addToCache(cacheName, request, response) {
+    if (request.scheme.indexOf('http') !== 0) return;
     return caches.open(cacheName).then(cache => cache.put(request, response.clone()));
 }
