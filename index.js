@@ -171,7 +171,7 @@ Vue.component('deck', {
             });
 
             // {j1}
-            if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer.name);
+            if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer);
 
             // {j2} & {j3}
             let j2 = this.players[Math.floor(Math.random() * this.players.length)];
@@ -190,8 +190,8 @@ Vue.component('deck', {
                 j3 = this.players[(this.players.indexOf(j2) + 1) % this.players.length];
             }
 
-            content = content.replace(/{j2}/g, j2.name);
-            content = content.replace(/{j3}/g, j3.name);
+            content = content.replace(/{j2}/g, j2);
+            content = content.replace(/{j3}/g, j3);
 
             // {one|two|three}
             content = content.replace(/{([^}]+(\|[^}]+)+)}/g, (value, match) => {
