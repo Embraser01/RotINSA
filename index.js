@@ -3,7 +3,7 @@
 //
 
 const BEER_ENTITY = '&#x1f37a;';
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 const ALERT_MSG = "Revenir à l'acceuil ?";
 
 //

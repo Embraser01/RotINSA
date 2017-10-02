@@ -1,4 +1,4 @@
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const CACHE_NAME = `rot-insa-v${CACHE_VERSION}-`;
 
 const URLS_TO_CACHE = {
@@ -27,7 +27,7 @@ const URLS_TO_CACHE = {
         'assets/images/poulet.jpg',
         'assets/images/ribery.jpg',
 
-        'lib/vue/vue.js',
+        'lib/vue/vue.min.js',
         'lib/vue-material/vue-material.js',
         'lib/vue-material/vue-material.css',
         'index.js',

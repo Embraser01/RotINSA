@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="lib/vue-material/vue-material.css">
     <link rel="stylesheet" href="index.css">
 
-    <script src="lib/vue/vue.js" defer></script>
+    <script src="lib/vue/vue.min.js" defer></script>
     <script src="lib/vue-material/vue-material.js" defer></script>
     <script src="index.js" defer></script>
 </head>
@@ -45,7 +45,7 @@
             <md-icon>people</md-icon>
         </md-button>
 
-        <md-bottom-bar v-if="!hide" class="bottom-bar">
+        <div v-if="!hide" class="bottom-bar">
             <h1 class="md-body-1">Idée originale
                 <a href="https://github.com/kara71/RotINSA">ici</a>,
                 reprise par <a href="https://github.com/Embraser01">Marc-Antoine FERNANDES</a></h1>
@@ -54,16 +54,12 @@
                 <md-icon>public</md-icon>
                 <md-tooltip md-direction="top">Voir sur Github</md-tooltip>
             </a>
-        </md-bottom-bar>
+        </div>
     </md-layout>
 </div>
 
 
 <!------- COMPONENTS -------->
-
-<!--------------------->
-<!------- CARD -------->
-<!--------------------->
 
 <script type="text/x-template" id="card-component">
     <md-card md-with-hover class="card">
@@ -88,11 +84,6 @@
         </md-card-media-cover>
     </md-card>
 </script>
-
-
-<!--------------------->
-<!------- DECK -------->
-<!--------------------->
 
 <script type="text/x-template" id="deck-component">
     <div class="deck">
@@ -147,11 +138,6 @@
 
 </script>
 
-
-<!------------------------------>
-<!------- PLAYERS INPUT -------->
-<!------------------------------>
-
 <script type="text/x-template" id="players-component">
     <form @submit.stop.prevent="validate">
         <md-card class="players">
@@ -186,11 +172,6 @@
         </md-card>
     </form>
 </script>
-
-
-<!------------------------------------->
-<!------- GROUPS CONFIGURATION -------->
-<!------------------------------------->
 
 <script type="text/x-template" id="groups-component">
     <md-dialog
