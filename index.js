@@ -29,6 +29,15 @@ function shuffle(array) {
     return array;
 }
 
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function repeat(value, num) {
     return new Array(num + 1).join(value);
 }
@@ -171,7 +180,7 @@ Vue.component('deck', {
             });
 
             // {j1}
-            if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer);
+            if (this.currentPlayer) content = content.replace(/{j1}/g, escapeHtml(this.currentPlayer));
 
             // {j2} & {j3}
             let j2 = this.players[Math.floor(Math.random() * this.players.length)];
@@ -190,8 +199,8 @@ Vue.component('deck', {
                 j3 = this.players[(this.players.indexOf(j2) + 1) % this.players.length];
             }
 
-            content = content.replace(/{j2}/g, j2);
-            content = content.replace(/{j3}/g, j3);
+            content = content.replace(/{j2}/g, escapeHtml(j2));
+            content = content.replace(/{j3}/g, escapeHtml(j3));
 
             // {one|two|three}
             content = content.replace(/{([^}]+(\|[^}]+)+)}/g, (value, match) => {
