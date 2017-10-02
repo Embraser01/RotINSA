@@ -19,6 +19,8 @@ et choisissez un jeu de carte.
 Ensuite il ne reste plusqu'à suivre les instructions.
 
 
+Le site est disponible en mode hors-ligne ! (Chrome et Firefox)
+
 ## Rajouter des cartes
 
 Si jamais vous trouvez qu'il manque de cartes ou que vous avez l'inspiration,
@@ -30,7 +32,7 @@ et de suivre le template suivant :
 Titre : [Nouvelle(s) carte(s)]
 
 Deck :
-    Nom du deck (liste [ici](./manifest.json))
+    Nom du deck (liste [ici](decks/manifest.json))
 
 
 Cartes :
@@ -54,7 +56,7 @@ Cartes :
 
 ### Le manifest
 
-L'ensemble des decks sont détaillés dans le fichier [`manifest.json`](./manifest.json).
+L'ensemble des decks sont détaillés dans le fichier [`manifest.json`](decks/manifest.json).
 Le fichier ressemble à ceci :
 
 ```json

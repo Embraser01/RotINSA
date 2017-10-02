@@ -2,7 +2,6 @@
 //  CONSTANTES
 //
 
-const DEFAULT_NB_PLAYER = 3;
 const BEER_ENTITY = '&#x1f37a;';
 const DEBUG_MODE = true;
 const ALERT_MSG = "Revenir à l'acceuil ?";
@@ -39,7 +38,7 @@ function generateUUID() { // Public Domain/MIT
     if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
         d += performance.now(); //use high-precision timer if available
     }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = (d + Math.random() * 16) % 16 | 0;
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
@@ -51,19 +50,66 @@ function log() {
     return console.log(arguments);
 }
 
+
+//
+// SERVICES
+//
+
+class Group {
+    constructor(name) {
+        this.name = name;
+        this.id = generateUUID();
+        this.players = [];
+    }
+}
+
+class GroupService {
+    get groups() {
+        return this._groups;
+    }
+
+    constructor() {
+        this.revert();
+    }
+
+    addGroup(group) {
+        this._groups.push(group);
+    }
+
+    deleteGroup(group) {
+        const i = this._groups.findIndex(p => p.id === group.id);
+        if (i > -1) this._groups.splice(i, 1);
+    }
+
+    updateGroup(group) {
+        const toUpdate = this._groups.find(p => p.id !== group.id);
+
+        if (toUpdate && toUpdate !== group) toUpdate.name = group.name;
+    }
+
+    revert() {
+        this._groups = JSON.parse(localStorage.getItem('groups')) || [];
+    }
+
+    save() {
+        localStorage.setItem('groups', JSON.stringify(this._groups));
+    }
+}
+
 //
 // GLOBAL VARIABLES AND INIT
 //
 
-Vue.config.devtools = true;
+Vue.config.devtools = DEBUG_MODE;
 
 // Include Vue material
 Vue.use(VueMaterial);
 
 
 // Event bus for unrelated components
-let bus = new Vue();
+const bus = new Vue();
 
+const groupService = new GroupService();
 
 //
 // COMPONENTS
@@ -82,10 +128,10 @@ Vue.component('card', {
         loadDeck: function () {
             log('Loading deck ', this.deck);
 
-            let xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open('GET', this.deck.questions_url);
             xhr.onload = () => {
-                let data = JSON.parse(xhr.responseText);
+                const data = JSON.parse(xhr.responseText);
                 bus.$emit('deck-loaded', data.info, data.cards);
             };
             xhr.send()
@@ -111,7 +157,6 @@ Vue.component('deck', {
             if (!this.currentCard) return;
 
             let content = this.currentCard.content;
-            let list;
 
             log('humanize', this.currentCard);
 
@@ -119,22 +164,14 @@ Vue.component('deck', {
             content = content.replace(/{b}/g, BEER_ENTITY);
 
             // {b1-3}
-            list = content.match(/{b\d+-\d+}/g);
-
-            if (list) {
-                content = content.replace(
-                    /{b\d+-\d+}/g,
-                    function (value) {
-                        // Each string is different
-                        let data = /{b(\d+)-(\d+)}/g.exec(value);
-
-                        return repeat(BEER_ENTITY, Number(data[2]) - Number(data[1]));
-                    }
-                );
-            }
+            content = content.replace(/{b\d+-\d+}/g, value => {
+                // Each string is different
+                const data = /{b(\d+)-(\d+)}/g.exec(value);
+                return repeat(BEER_ENTITY, Number(data[2]) - Number(data[1]));
+            });
 
             // {j1}
-            if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer.name);
+            if (this.currentPlayer) content = content.replace(/{j1}/g, this.currentPlayer);
 
             // {j2} & {j3}
             let j2 = this.players[Math.floor(Math.random() * this.players.length)];
@@ -153,25 +190,15 @@ Vue.component('deck', {
                 j3 = this.players[(this.players.indexOf(j2) + 1) % this.players.length];
             }
 
-            content = content.replace(/{j2}/g, j2.name);
-            content = content.replace(/{j3}/g, j3.name);
+            content = content.replace(/{j2}/g, j2);
+            content = content.replace(/{j3}/g, j3);
 
             // {one|two|three}
-
-            // {b1-3}
-            list = content.match(/{.+(\|.+)+}/g);
-
-            if (list) {
-                content = content.replace(
-                    /{.+(\|.+)+}/g,
-                    function (value) {
-                        // Each string is different
-                        let data = value.slice(1, -1).split('|');
-                        return data[Math.floor(Math.random() * data.length)];
-                    }
-                );
-            }
-
+            content = content.replace(/{([^}]+(\|[^}]+)+)}/g, (value, match) => {
+                // Each string is different
+                const data = match.split('|');
+                return data[Math.floor(Math.random() * data.length)];
+            });
 
             return content;
         }
@@ -263,21 +290,69 @@ Vue.component('players', {
     template: '#players-component',
     data: function () {
         return {
-            players: []
+            players: [],
+            groups: groupService.groups
         }
     },
     methods: {
-        addPlayer: function () {
-            this.players.push({
-                name: ""
+        importGroup(group) {
+            group.players.forEach(p => {
+                if (this.players.indexOf(p) > -1) return;
+                this.players.push(p);
             });
         },
-        validate: function () {
+        validate() {
+            if (this.players.length < 3) {
+                return;
+            }
+
             this.$emit('validate', this.players);
         }
+    }
+});
+
+Vue.component('groups', {
+    template: '#groups-component',
+    data: function () {
+        return {
+            groups: groupService.groups,
+            selectedGroup: null
+        }
     },
-    created: function () {
-        for (let i = 0; i < DEFAULT_NB_PLAYER; i++) this.addPlayer();
+    methods: {
+        addGroup() {
+            groupService.addGroup(new Group());
+        },
+
+        deleteGroup() {
+            if (confirm(`Etes-vous sûr de vouloir supprimer le groupe ${this.selectedGroup.name} ?`)) {
+                groupService.deleteGroup(this.selectedGroup);
+                this.selectedGroup = null;
+            }
+        },
+
+        cancel() {
+            if (!this.selectedGroup) {
+                this.$refs.groupsDialog.close();
+                groupService.revert();
+                this.groups = groupService.groups;
+            } else {
+                this.selectedGroup = null;
+            }
+        },
+
+        validate() {
+            if (!this.selectedGroup) {
+                groupService.save();
+                this.$refs.groupsDialog.close();
+            } else {
+                this.selectedGroup = null;
+            }
+        },
+
+        open() {
+            this.$refs.groupsDialog.open();
+        }
     }
 });
 
@@ -287,7 +362,7 @@ Vue.component('players', {
 //
 
 
-let vm = new Vue({
+const vm = new Vue({
 
     el: '#app',
 
@@ -297,7 +372,7 @@ let vm = new Vue({
         decks: null
     },
 
-    created: function () {
+    created() {
         // We subscribe for when the deck is closed or loaded
         bus.$on('deck-finished', () => {
             this.hide = false;
@@ -308,15 +383,13 @@ let vm = new Vue({
 
         // Chargement de la liste des decks
         this.fetchData();
-
-
     },
 
     methods: {
-        fetchData: function () {
-            let xhr = new XMLHttpRequest();
+        fetchData() {
+            const xhr = new XMLHttpRequest();
 
-            xhr.open('GET', './manifest.json');
+            xhr.open('GET', './decks/manifest.json');
             xhr.onload = () => {
                 this.app = JSON.parse(xhr.responseText);
 
@@ -326,63 +399,10 @@ let vm = new Vue({
                 log(this.decks);
             };
             xhr.send()
+        },
+
+        configGroups() {
+            this.$refs.groupsComp.open();
         }
     }
 });
-
-
-//
-// SERVICES
-//
-
-class Player {
-    constructor(name) {
-        this._name = name;
-        this.id = generateUUID();
-    }
-
-    set name(name) {
-        this._name = name;
-    }
-
-    get name() {
-        return this._name;
-    }
-}
-
-class PlayersService {
-
-    constructor() {
-        this._players = JSON.parse(localStorage.getItem('players')) || [];
-    }
-
-    get players() {
-        return this._players.slice(0);
-    }
-
-    addPlayer(player) {
-        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        this._players.push(player);
-        this._save();
-    }
-
-    deletePlayer(player) {
-        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        this._players = this._players.filter(p => p.id !== player.id);
-        this._save();
-    }
-
-    updatePlayer(player) {
-        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        let toUpdate = this._players.find(p => p.id !== player.id);
-
-        if (toUpdate && toUpdate !== player) toUpdate.name = player.name;
-        this._save();
-    }
-
-    _save() {
-        localStorage.setItem('players', JSON.stringify(this._players));
-    }
-}
-
-let playersService = new PlayersService();

@@ -1,43 +1,45 @@
-const CACHE_NAME = 'rot-insa-v1-';
+const CACHE_VERSION = 1;
+const CACHE_NAME = `rot-insa-v${CACHE_VERSION}-`;
 
 const URLS_TO_CACHE = {
     static: [
+        'assets/favicon/android-chrome-192x192.png',
+        'assets/favicon/android-chrome-512x512.png',
+        'assets/favicon/apple-touch-icon.png',
+        'assets/favicon/browserconfig.xml',
+        'assets/favicon/favicon.ico',
+        'assets/favicon/favicon-16x16.png',
+        'assets/favicon/favicon-32x32.png',
+        'assets/favicon/manifest.json',
+        'assets/favicon/mstile-150x150.png',
+        'assets/favicon/safari-pinned-tab.svg',
+
+        'assets/font/Roboto-Medium.ttf',
+        'assets/font/Roboto-Regular.ttf',
+        'assets/font/RobotoSlab-Light.ttf',
+        'assets/font/MaterialIcons-Regular.woff2',
+
+        'assets/images/fap.jpg',
+        'assets/images/hardcore.jpg',
+        'assets/images/informaticien.jpg',
+        'assets/images/joker.jpg',
+        'assets/images/obama.jpg',
+        'assets/images/poulet.jpg',
+        'assets/images/ribery.jpg',
+
+        'lib/vue/vue.js',
+        'lib/vue-material/vue-material.js',
+        'lib/vue-material/vue-material.css',
         'index.js',
         'index.css',
         'index.html',
-
-        'favicon/android-chrome-192x192.png',
-        'favicon/android-chrome-512x512.png',
-        'favicon/apple-touch-icon.png',
-        'favicon/browserconfig.xml',
-        'favicon/favicon.ico',
-        'favicon/favicon-16x16.png',
-        'favicon/favicon-32x32.png',
-        'favicon/manifest.json',
-        'favicon/mstile-150x150.png',
-        'favicon/safari-pinned-tab.svg',
-
-        'https://fonts.googleapis.com/css?family=Roboto+Slab:300|Roboto:300,400,500,700,400italic',
-        'https://fonts.googleapis.com/icon?family=Material+Icons',
-        '//unpkg.com/vue-material/dist/vue-material.css',
-
-        '//unpkg.com/vue/dist/vue.min.js',
-        '//unpkg.com/vue-material/dist/vue-material.js',
-
-        'images/fap.jpg',
-        'images/hardcore.jpg',
-        'images/informaticien.jpg',
-        'images/joker.jpg',
-        'images/obama.jpg',
-        'images/poulet.jpg',
-        'images/ribery.jpg',
     ],
     decks: [
-        'manifest.json',
         'decks/fap.json',
         'decks/hardcore.json',
         'decks/if.json',
         'decks/jenaijamais.json',
+        'decks/manifest.json',
         'decks/repliques.json',
         'decks/ringoffire.json',
         'decks/rotistandard.json',
@@ -46,7 +48,7 @@ const URLS_TO_CACHE = {
 
 
 self.addEventListener('install', event => {
-    let promises = [];
+    const promises = [];
 
     promises.push(caches.open(CACHE_NAME + 'decks').then(cache => cache.addAll(URLS_TO_CACHE.decks)));
     promises.push(caches.open(CACHE_NAME + 'static').then(cache => cache.addAll(URLS_TO_CACHE.static)));
@@ -56,7 +58,7 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
 
-    let requestURL = new URL(event.request.url);
+    const requestURL = new URL(event.request.url);
 
     // Routing for local URLs
     if (requestURL.origin === location.origin) {
@@ -79,5 +81,6 @@ self.addEventListener('fetch', event => {
 
 
 function addToCache(cacheName, request, response) {
+    if (!request || request.url.indexOf('http') !== 0) return;
     return caches.open(cacheName).then(cache => cache.put(request, response.clone()));
 }
