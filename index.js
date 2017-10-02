@@ -2,7 +2,6 @@
 //  CONSTANTES
 //
 
-const DEFAULT_NB_PLAYER = 3;
 const BEER_ENTITY = '&#x1f37a;';
 const DEBUG_MODE = true;
 const ALERT_MSG = "Revenir à l'acceuil ?";
@@ -51,6 +50,52 @@ function log() {
     return console.log(arguments);
 }
 
+
+//
+// SERVICES
+//
+
+class Group {
+    constructor(name) {
+        this.name = name;
+        this.id = generateUUID();
+        this.players = [];
+    }
+}
+
+class GroupService {
+    get groups() {
+        return this._groups;
+    }
+
+    constructor() {
+        this.revert();
+    }
+
+    addGroup(group) {
+        this._groups.push(group);
+    }
+
+    deleteGroup(group) {
+        const i = this._groups.findIndex(p => p.id === group.id);
+        if (i > -1) this._groups.splice(i, 1);
+    }
+
+    updateGroup(group) {
+        const toUpdate = this._groups.find(p => p.id !== group.id);
+
+        if (toUpdate && toUpdate !== group) toUpdate.name = group.name;
+    }
+
+    revert() {
+        this._groups = JSON.parse(localStorage.getItem('groups')) || [];
+    }
+
+    save() {
+        localStorage.setItem('groups', JSON.stringify(this._groups));
+    }
+}
+
 //
 // GLOBAL VARIABLES AND INIT
 //
@@ -64,6 +109,7 @@ Vue.use(VueMaterial);
 // Event bus for unrelated components
 const bus = new Vue();
 
+const groupService = new GroupService();
 
 //
 // COMPONENTS
@@ -82,10 +128,10 @@ Vue.component('card', {
         loadDeck: function () {
             log('Loading deck ', this.deck);
 
-            let xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open('GET', this.deck.questions_url);
             xhr.onload = () => {
-                let data = JSON.parse(xhr.responseText);
+                const data = JSON.parse(xhr.responseText);
                 bus.$emit('deck-loaded', data.info, data.cards);
             };
             xhr.send()
@@ -244,21 +290,69 @@ Vue.component('players', {
     template: '#players-component',
     data: function () {
         return {
-            players: []
+            players: [],
+            groups: groupService.groups
         }
     },
     methods: {
-        addPlayer: function () {
-            this.players.push({
-                name: ""
+        importGroup(group) {
+            group.players.forEach(p => {
+                if (this.players.indexOf(p) > -1) return;
+                this.players.push(p);
             });
         },
-        validate: function () {
+        validate() {
+            if (this.players.length < 3) {
+                return;
+            }
+
             this.$emit('validate', this.players);
         }
+    }
+});
+
+Vue.component('groups', {
+    template: '#groups-component',
+    data: function () {
+        return {
+            groups: groupService.groups,
+            selectedGroup: null
+        }
     },
-    created: function () {
-        for (let i = 0; i < DEFAULT_NB_PLAYER; i++) this.addPlayer();
+    methods: {
+        addGroup() {
+            groupService.addGroup(new Group());
+        },
+
+        deleteGroup() {
+            if (confirm(`Etes-vous sûr de vouloir supprimer le groupe ${this.selectedGroup.name} ?`)) {
+                groupService.deleteGroup(this.selectedGroup);
+                this.selectedGroup = null;
+            }
+        },
+
+        cancel() {
+            if (!this.selectedGroup) {
+                this.$refs.groupsDialog.close();
+                groupService.revert();
+                this.groups = groupService.groups;
+            } else {
+                this.selectedGroup = null;
+            }
+        },
+
+        validate() {
+            if (!this.selectedGroup) {
+                groupService.save();
+                this.$refs.groupsDialog.close();
+            } else {
+                this.selectedGroup = null;
+            }
+        },
+
+        open() {
+            this.$refs.groupsDialog.open();
+        }
     }
 });
 
@@ -278,7 +372,7 @@ const vm = new Vue({
         decks: null
     },
 
-    created: function () {
+    created() {
         // We subscribe for when the deck is closed or loaded
         bus.$on('deck-finished', () => {
             this.hide = false;
@@ -289,15 +383,13 @@ const vm = new Vue({
 
         // Chargement de la liste des decks
         this.fetchData();
-
-
     },
 
     methods: {
-        fetchData: function () {
+        fetchData() {
             const xhr = new XMLHttpRequest();
 
-            xhr.open('GET', './manifest.json');
+            xhr.open('GET', './decks/manifest.json');
             xhr.onload = () => {
                 this.app = JSON.parse(xhr.responseText);
 
@@ -307,63 +399,10 @@ const vm = new Vue({
                 log(this.decks);
             };
             xhr.send()
+        },
+
+        configGroups() {
+            this.$refs.groupsComp.open();
         }
     }
 });
-
-
-//
-// SERVICES
-//
-
-class Player {
-    constructor(name) {
-        this._name = name;
-        this.id = generateUUID();
-    }
-
-    set name(name) {
-        this._name = name;
-    }
-
-    get name() {
-        return this._name;
-    }
-}
-
-class PlayersService {
-
-    constructor() {
-        this._players = JSON.parse(localStorage.getItem('players')) || [];
-    }
-
-    get players() {
-        return this._players.slice(0); // Clone array
-    }
-
-    addPlayer(player) {
-        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        this._players.push(player);
-        this._save();
-    }
-
-    deletePlayer(player) {
-        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        this._players = this._players.filter(p => p.id !== player.id);
-        this._save();
-    }
-
-    updatePlayer(player) {
-        if (!player instanceof Player) throw new Error(`Excepted Player but got ${typeof player}`);
-        const toUpdate = this._players.find(p => p.id !== player.id);
-
-        if (toUpdate && toUpdate !== player) toUpdate.name = player.name;
-        this._save();
-    }
-
-    _save() {
-        localStorage.setItem('players', JSON.stringify(this._players));
-    }
-}
-
-let playersService = new PlayersService();

@@ -4,49 +4,49 @@
       "name":"Rôti standard",
       "description": "Pour une rôtisserie classique en famille ou entre amis",
       "difficulty": 2,
-      "cover": "images/poulet.jpg",
+      "cover": "assets/images/poulet.jpg",
       "questions_url": "decks/rotistandard.json"
     },
     {
       "name":"Je n'ai jamais",
       "description": "Découvrez des dossiers sur vos amis de manière très conviviale",
       "difficulty": 4,
-      "cover": "images/ribery.jpg",
+      "cover": "assets/images/ribery.jpg",
       "questions_url": "decks/jenaijamais.json"
     },
     {
       "name":"IF",
       "description": "Je suis ingénieur informaticieeeeeeen",
       "difficulty": 3,
-      "cover": "images/informaticien.jpg",
+      "cover": "assets/images/informaticien.jpg",
       "questions_url": "decks/if.json"
     },
     {
       "name":"Citations",
       "description": "Complétez les citations données",
       "difficulty": 3,
-      "cover": "images/obama.jpg",
+      "cover": "assets/images/obama.jpg",
       "questions_url": "decks/repliques.json"
     },
     {
       "name":"Ring of Fire",
       "description": "Baby you're so classic",
       "difficulty": 2,
-      "cover": "images/joker.jpg",
+      "cover": "assets/images/joker.jpg",
       "questions_url": "decks/ringoffire.json"
     },
     {
       "name":"Hardcore",
       "description": "Pour les plus solides",
       "difficulty": 5,
-      "cover": "images/hardcore.jpg",
+      "cover": "assets/images/hardcore.jpg",
       "questions_url": "decks/hardcore.json"
     },
     {
       "name":"Fap Achievements",
       "description": "Différents fap achievements, distribue si tu l'as déjà fait ! (cartes en anglais)",
       "difficulty": 5,
-      "cover": "images/fap.jpg",
+      "cover": "assets/images/fap.jpg",
       "questions_url": "decks/fap.json"
     }
   ]
