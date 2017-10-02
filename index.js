@@ -194,9 +194,9 @@ Vue.component('deck', {
             content = content.replace(/{j3}/g, j3.name);
 
             // {one|two|three}
-            content = content.replace(/{.+(\|.+)+}/g, value => {
+            content = content.replace(/{([^}]+(\|[^}]+)+)}/g, (value, match) => {
                 // Each string is different
-                const data = value.slice(1, -1).split('|');
+                const data = match.split('|');
                 return data[Math.floor(Math.random() * data.length)];
             });
 

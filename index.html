@@ -123,7 +123,7 @@
             <md-whiteframe class="question" md-elevation="2" @click.native="next()">
                 <span v-html="cardReader" class="md-subheading noselect"></span>
             </md-whiteframe>
-            <p v-if="currentPlayer" class="md-title player-name noselect">C'est au tour de {{ currentPlayer.name }}</p>
+            <p v-if="currentPlayer" class="md-title player-name noselect">C'est au tour de {{ currentPlayer }}</p>
         </div>
 
         <!-- GAME'S END -->
@@ -162,20 +162,19 @@
             <md-card-content>
                 <md-menu>
                     <md-button md-menu-trigger>
-                        <md-icon>file_download</md-icon>
+                        <md-icon>file_download</md-icon> Charger un groupe
                     </md-button>
 
                     <md-menu-content>
-                        <md-subheader>Charger un groupe prédéfini</md-subheader>
                         <md-menu-item v-for="group in groups" :key="group.id" @click.native="importGroup(group)">
                             {{ group.name }}
                         </md-menu-item>
-                        <md-menu-item v-if="groups && groups.length === 0">Créer un groupe</md-menu-item>
+                        <md-subheader v-if="groups && groups.length === 0">Vous devez d'abord créer un groupe</md-subheader>
                     </md-menu-content>
                 </md-menu>
 
                 <md-chips v-model="players"
-                          md-input-placeholder="Ajoutez au moins 3 joueurs"
+                          md-input-placeholder="Ajoutez des joueurs"
                           :class="players.length < 3 ? 'md-input-invalid': ''">
                     <span class="md-error">Il doit y avoir au moins 3 personnes pour jouer</span>
                 </md-chips>
