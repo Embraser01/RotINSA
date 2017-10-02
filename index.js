@@ -54,6 +54,17 @@ function generateUUID() { // Public Domain/MIT
     });
 }
 
+function onKonamiCode(cb) {
+    let input = '';
+    const key = '38384040373937396665';
+    document.addEventListener('keydown', e => {
+        input += '' + e.keyCode;
+        if (input === key) return cb();
+        if (!key.indexOf(input)) return;
+        input = '' + e.keyCode;
+    });
+}
+
 function log() {
     if (!DEBUG_MODE) return;
     return console.log(arguments);
@@ -378,7 +389,8 @@ const vm = new Vue({
     data: {
         app: null,
         hide: false,
-        decks: null
+        decks: null,
+        konami: false
     },
 
     created() {
@@ -392,8 +404,15 @@ const vm = new Vue({
 
         // Chargement de la liste des decks
         this.fetchData();
-    },
 
+
+        onKonamiCode(() => this.konami = true);
+    },
+    computed: {
+        displayedDecks() {
+            return !this.decks || this.decks.filter(d => this.konami || !d.konami);
+        }
+    },
     methods: {
         fetchData() {
             const xhr = new XMLHttpRequest();

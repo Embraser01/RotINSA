@@ -37,7 +37,7 @@
             <h2 class="subtitle">La rôtiserie en ligne</h2>
 
             <md-layout md-align="center" md-row md-gutter>
-                <card md-flex v-for="deck in decks" :key="deck.name" :deck="deck"></card>
+                <card md-flex v-for="deck in displayedDecks" :key="deck.name" :deck="deck"></card>
             </md-layout>
         </div>
 
