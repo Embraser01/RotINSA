@@ -1,4 +1,5 @@
 {
+  "short_name ": "Rot'INSA",
   "name": "Rot'INSA",
   "icons": [
     {
@@ -15,5 +16,6 @@
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
-  "orientation": "portrait-primary"
+  "orientation": "portrait",
+  "start_url": "/?utm_source=homescreen"
 }

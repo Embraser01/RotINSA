@@ -406,3 +406,5 @@ const vm = new Vue({
         }
     }
 });
+
+window.onbeforeunload = () => "Tu es sûr de vouloir quitter ?";
